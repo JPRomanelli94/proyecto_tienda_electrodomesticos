@@ -1,0 +1,116 @@
+version: '2.1'
+
+services:
+  eureka-server:
+    build: eureka-sv
+    mem_limit: 512m
+    ports:
+      - "8761:8761"
+    networks:
+      - 'appliances-network'
+  config-server:
+    build: config-server
+    mem_limit: 512m
+    ports:
+      - "8081:8081"
+    networks:
+      - 'appliances-network'
+  products-service:
+    build: products-service
+    mem_limit: 512m
+    ports:
+      - "8083:8083"
+    environment:
+      SS_URL: jdbc:mysql://products_serv:3306/products_service?createDatabaseIfNotExists=true&serverTimeZone=UTC
+      SS_USER: root
+      SS_PASSWORD: 1234
+    restart: always
+    depends_on:
+      products_serv:
+          condition: service_healthy
+    networks:
+      - 'appliances-network'
+  products_serv:
+    image: mysql:8.0.33 
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: products_service
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    networks:
+      - 'appliances-network'
+  trolleys-service:
+    build: trolleys-service
+    mem_limit: 512m
+    ports:
+      - "8084:8084"
+    environment:
+      SS_URL: jdbc:mysql://trolleys_serv:3306/trolleys_service?createDatabaseIfNotExists=true&serverTimeZone=UTC
+      SS_USER: root
+      SS_PASSWORD: 1234
+    restart: always
+    depends_on:
+      trolleys_serv:
+          condition: service_healthy
+    networks:
+      - 'appliances-network'
+  trolleys_serv:
+    image: mysql:8.0.33 
+    ports:
+      - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: trolleys_service
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    networks:
+      - 'appliances-network'
+  sales-service:
+    build: sales-service
+    mem_limit: 512m
+    ports:
+      - "8085:8085"
+    environment:
+      SS_URL: jdbc:mysql://sales_serv:3306/sales_service?createDatabaseIfNotExists=true&serverTimeZone=UTC
+      SS_USER: root
+      SS_PASSWORD: 1234
+    restart: always
+    depends_on:
+      sales_serv:
+          condition: service_healthy
+    networks:
+      - 'appliances-network'
+  sales_serv:
+    image: mysql:8.0.33 
+    ports:
+      - "3310:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_PASSWORD: 1234
+      MYSQL_DATABASE: sales_service
+    restart: always
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+    networks:
+      - 'appliances-network'
+  api-gateway:
+    build: api-gateway
+    mem_limit: 512m
+    ports:
+      - "443:443"
+    networks:
+      - 'appliances-network'
+networks:
+  appliances-network:

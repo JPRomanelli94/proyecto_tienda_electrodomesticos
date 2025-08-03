@@ -1,0 +1,15 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: config-server
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/JPRomanelli94/proyecto_tienda_electrodomesticos.git
+          searchPaths: config-data
+          username: ${USER_GIT}
+          password: ${PASSWORD_GIT}
